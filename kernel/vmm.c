@@ -186,7 +186,7 @@ void *user_va_to_pa(pagetable_t page_dir, void *va)
   pte_t *pte = page_walk(page_dir, (uint64)va, 0);
   if (pte == 0 || (*pte & PTE_V) == 0 || ((*pte & PTE_R) == 0 && (*pte & PTE_W) == 0))
     return NULL;
-  uint64 pa = PTE2PA(*pte);
+  uint64 pa = PTE2PA(*pte) + ((uint64)va & (1 << PGSHIFT - 1));
   return (void *)pa;
 }
 
