@@ -51,20 +51,24 @@ void handle_mtimer_trap()
 // sepc: the pc when fault happens;
 // stval: the virtual address that causes pagefault when being accessed.
 //
-void handle_user_page_fault(uint64 mcause, uint64 sepc, uint64 stval) {
+void handle_user_page_fault(uint64 mcause, uint64 sepc, uint64 stval)
+{
   sprint("handle_page_fault: %lx\n", stval);
-  switch (mcause) {
-    case CAUSE_STORE_PAGE_FAULT:
-      // TODO (lab2_3): implement the operations that solve the page fault to
-      // dynamically increase application stack.
-      // hint: first allocate a new physical page, and then, maps the new page to the
-      // virtual address that causes the page fault.
-      panic( "You need to implement the operations that actually handle the page fault in lab2_3.\n" );
+  switch (mcause)
+  {
+  case CAUSE_STORE_PAGE_FAULT:
+    // TODO (lab2_3): implement the operations that solve the page fault to
+    // dynamically increase application stack.
+    // hint: first allocate a new physical page, and then, maps the new page to the
+    // virtual address that causes the page fault.
+    // panic( "You need to implement the operations that actually handle the page fault in lab2_3.\n" );
 
-      break;
-    default:
-      sprint("unknown page fault.\n");
-      break;
+    map_pages(current->pagetable, ROUNDDOWN(stval, PGSIZE), PGSIZE, (uint64)alloc_page(), prot_to_type(PROT_READ | PROT_WRITE, 1));
+
+    break;
+  default:
+    sprint("unknown page fault.\n");
+    break;
   }
 }
 
@@ -88,24 +92,25 @@ void smode_trap_handler(void)
   uint64 cause = read_csr(scause);
 
   // use switch-case instead of if-else, as there are many cases since lab2_3.
-  switch (cause) {
-    case CAUSE_USER_ECALL:
-      handle_syscall(current->trapframe);
-      break;
-    case CAUSE_MTIMER_S_TRAP:
-      handle_mtimer_trap();
-      break;
-    case CAUSE_STORE_PAGE_FAULT:
-    case CAUSE_LOAD_PAGE_FAULT:
-      // the address of missing page is stored in stval
-      // call handle_user_page_fault to process page faults
-      handle_user_page_fault(cause, read_csr(sepc), read_csr(stval));
-      break;
-    default:
-      sprint("smode_trap_handler(): unexpected scause %p\n", read_csr(scause));
-      sprint("            sepc=%p stval=%p\n", read_csr(sepc), read_csr(stval));
-      panic( "unexpected exception happened.\n" );
-      break;
+  switch (cause)
+  {
+  case CAUSE_USER_ECALL:
+    handle_syscall(current->trapframe);
+    break;
+  case CAUSE_MTIMER_S_TRAP:
+    handle_mtimer_trap();
+    break;
+  case CAUSE_STORE_PAGE_FAULT:
+  case CAUSE_LOAD_PAGE_FAULT:
+    // the address of missing page is stored in stval
+    // call handle_user_page_fault to process page faults
+    handle_user_page_fault(cause, read_csr(sepc), read_csr(stval));
+    break;
+  default:
+    sprint("smode_trap_handler(): unexpected scause %p\n", read_csr(scause));
+    sprint("            sepc=%p stval=%p\n", read_csr(sepc), read_csr(stval));
+    panic("unexpected exception happened.\n");
+    break;
   }
 
   // continue (come back to) the execution of current process.
