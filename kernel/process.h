@@ -16,7 +16,7 @@ typedef struct trapframe_t {
 
   // kernel page table. added @lab2_1
   /* offset:272 */ uint64 kernel_satp;
-}trapframe;
+}trapframe;//保存上下文
 
 // riscv-pke kernel supports at most 32 processes
 #define NPROC 32
