@@ -33,6 +33,9 @@ void handle_mtrap()
   uint64 mcause = read_csr(mcause);
   switch (mcause)
   {
+  case CAUSE_MTIMER:
+    handle_timer();
+    break;
   case CAUSE_FETCH_ACCESS:
     handle_instruction_access_fault();
     break;
@@ -44,8 +47,10 @@ void handle_mtrap()
   case CAUSE_ILLEGAL_INSTRUCTION:
     // TODO (lab1_2): call handle_illegal_instruction to implement illegal instruction
     // interception, and finish lab1_2.
+
     // panic( "call handle_illegal_instruction to accomplish illegal instruction interception for lab1_2.\n" );
     handle_illegal_instruction();
+
     break;
   case CAUSE_MISALIGNED_LOAD:
     handle_misaligned_load();
